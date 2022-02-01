@@ -5,6 +5,8 @@ from os.path import exists as file_exists
 import pandas as pd
 import csv
 import openpyxl
+import os
+import sys
 import time
 import requests
 import random
@@ -23,9 +25,9 @@ while file_exists(filename) == False:
     filename = input("Enter file name(example: filename.xlsx): ")
     clear_function()
 
+openfile = pd.read_excel(filename)
+file = [openfile]
 
-
-openfile = pd.read_excel(filename, usecols='B')
 row = 0
 links = []
 while row < len(openfile.index):
@@ -33,6 +35,9 @@ while row < len(openfile.index):
   page = requests.get(openfile.loc[row, 'httpDescriptionAlso'])
   links.append(page)
   pagecontent = bs(page.content, 'html.parser')
-  print(pagecontent)
+  names = [i.text for i in pagecontent.find_all(class_='name')]
+  #for i in range(0, len(names)-1):
+  #addcolumn = openfile.append(names[i], ignore_index=True)
+  addcolumns = pd.concat(file,names)
+  addcolumns.to_excel(filename, index=False)
   row+=1
-
