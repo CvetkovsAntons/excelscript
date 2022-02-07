@@ -26,7 +26,6 @@ while file_exists(filename) == False:
     clear_function()
 
 openfile = pd.read_excel(filename)
-file = [openfile]
 
 row = 0
 links = []
@@ -36,8 +35,9 @@ while row < len(openfile.index):
   links.append(page)
   pagecontent = bs(page.content, 'html.parser')
   names = [i.text for i in pagecontent.find_all(class_='name')]
-  #for i in range(0, len(names)-1):
-  #addcolumn = openfile.append(names[i], ignore_index=True)
-  addcolumns = pd.concat(file,names)
-  addcolumns.to_excel(filename, index=False)
+  for i in range(0, len(names)-1):
+    addcolumns = openfile.append(names[i], ignore_index=True)
+    # addcolumns = pd.concat(file,names)
+    addcolumns.to_excel(filename, index=False)
   row+=1
+
