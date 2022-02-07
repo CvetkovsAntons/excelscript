@@ -26,18 +26,37 @@ while file_exists(filename) == False:
     clear_function()
 
 openfile = pd.read_excel(filename)
+file = [openfile]
 
-row = 0
 links = []
-while row < len(openfile.index):
-  # print(openfile.loc[row, 'httpDescriptionAlso'])
-  page = requests.get(openfile.loc[row, 'httpDescriptionAlso'])
-  links.append(page)
+names = []
+groups = []
+for i in openfile.index:
+  links.append(openfile['httpDescriptionAlso'][i])
+
+for i in range(0, len(links)):
+  page = requests.get(links[i])
   pagecontent = bs(page.content, 'html.parser')
-  names = [i.text for i in pagecontent.find_all(class_='name')]
-  for i in range(0, len(names)-1):
-    addcolumns = openfile.append(names[i], ignore_index=True)
-    # addcolumns = pd.concat(file,names)
-    addcolumns.to_excel(filename, index=False)
-  row+=1
+  addnames = [i.text for i in pagecontent.find_all(class_='name')]
+  addgroups = [i.text for i in pagecontent.find_all(class_=['mspec alt-0', 'mspec alt-1'])]
+  for i in range(0, len(addnames)):
+    if addnames[i] not in names:
+      names.append(addnames[i])
+    else:
+      continue
+  for i in range(0, len(addgroups)):
+    if addgroups[i] not in groups:
+      groups.append(addgroups[i])
+    else:
+      continue
+  addnames.clear()
+  addgroups.clear()
+
+del names[0]
+
+for i in range(0, len(names)):
+  for j in range(0, len(groups)):
+    if pagecontent.find_all(class_=['mspec alt-0', 'mspec alt-1'])
+      openfile.insert(loc=i+2, column=names[i], value=names[i])
+  pd.DataFrame(openfile).to_excel(filename)
 
