@@ -88,6 +88,11 @@ def getNameAndValue(text):
     if any(c in 'amp;' for c in nameResult):
         nameResult = nameResult.replace('amp;', '')
 
+    if '/<br>' in valueResult:
+        valueResult = valueResult.replace('</br>', '')
+    elif '<br/>' in valueResult:
+        valueResult = valueResult.replace('<br/>', '')
+
 
 clear_function()
 
@@ -110,6 +115,7 @@ names = []
 html = []
 className = []
 productName = []
+productNameCheck = []
 marketingText = []
 marketingTextHtml = []
 featuresText = []
@@ -156,6 +162,9 @@ for i in range(0, len(links)):
 
     for productNameAppend in pageContent.find_all(class_='productName'):
         productName.append(productNameAppend.text)
+
+    for  productNameCheckAppend in pageContent.find_all(class_='productName'):
+        productNameCheck.append(productNameCheckAppend.text)
 
     for marketingTextAppend in pageContent.find_all(class_='marketingText'):
         marketingText.append(marketingTextAppend.text)
@@ -239,13 +248,20 @@ for i in range(0, len(featuresTextHtml)):
         featuresTextHtml[i].replace('amp;', '')
 
 
+for i in range(0, len(productNameCheck)):
+    if "\'s" in str(productNameCheck[i]):
+        productNameCheck[i] = str(productNameCheck[i]).replace("\'s", "'s")
+    if '\xa0' in productNameCheck[i]:
+        productNameCheck[i].replace('\xa0', '')
+    if 'amp;' in productNameCheck[i]:
+        productNameCheck[i].replace('amp;', '')
+
+
 for i in range(0, len(className)):
     if '\xa0' in className[i]:
         className[i].remove('\xa0')
-
     if ' ' in className[i]:
         className[i].remove(' ')
-
     if 'Product Properties' in className[i]:
         className[i].remove('Product Properties')
 
@@ -263,6 +279,7 @@ for i in range(0, len(html)):
 
 countMarket = 0
 countFeatures = 0
+countName = 0
 columnsNotUsed = ['Product Name']
 for i in range(0, len(className)):
     if 'NOT FOUND' in str(fullPage[i]) and 'No products found' in str(fullPage[i]):
@@ -274,14 +291,11 @@ for i in range(0, len(className)):
                 if str(key) not in className[i]:
                     columns[key].insert(i, '')
 
-    for j in range(0, len(productName)):
-        for key, value in htmlEscapeTable.items():
-            if str(key) in str(productName[j]):
-                newName = ''.join(htmlEscapeTable.get(c, c) for c in str(productName[j]))
-                if newName in str(fullPage[i]):
-                    columns['Product Name'].append(productName[j])
-        if str(productName[j]) in str(fullPage[i]):
-            columns['Product Name'].append(productName[j])
+    while countName < len(productName):
+        if str(productName[countName]) in str(productNameCheck[i]):
+            columns['Product Name'].append(productName[countName])
+            countName += 1
+            break
 
     while countMarket < len(marketingText):
         if str(marketingText[countMarket]) in str(marketingTextHtml[i]):
@@ -322,12 +336,12 @@ for key, value in columns.items():
 for key, value in columns.items():
     print(key, ' : ', value)
     print(len(value))
-    # if key == 'Marketing Description':
+    # if key == 'Product Name':
     #     for i in range(0, len(value)):
     #         print(value[i])
 # for key, value in columns.items():
 #     openfile.insert(loc=2, column=key, value=value)
 # pd.DataFrame(openfile).to_excel(filename)
-
+print(productName)
 # for i in range(len(featuresTextHtml)):
 #     print(i, ':', featuresTextHtml[i])
